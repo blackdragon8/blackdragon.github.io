@@ -72,11 +72,11 @@
     <header>
       
         <div class="icon"></div>
-        <time datetime="2018-12-19T15:22:08.832Z"><a href="/2018/12/19/APP中间人攻击：你以为白名单就安全了/">2018-12-19</a></time>
+        <time datetime="2018-12-19T15:30:34.000Z"><a href="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/">2018-12-19</a></time>
       
       
   
-    <h1 class="title"><a href="/2018/12/19/APP中间人攻击：你以为白名单就安全了/"></a></h1>
+    <h1 class="title"><a href="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/">APP中间人攻击：你以为白名单就安全了</a></h1>
   
 
     </header>
@@ -104,7 +104,7 @@
 <li>装有app的手机</li>
 </ol>
 <p><strong>payload：</strong>  </p>
-<p><img src="D047EBBA5DB1463B894EA54BBFD5DD0E" alt="1"></p>
+<p><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/APP中间人攻击：你以为白名单就安全了/1.png" alt="1"></p>
 <p><strong>攻击原理：</strong><br>&emsp;&emsp;访问第三方网页没问题，是使用https传输的；但是第三方网页渲染所需（还是广告）的js文件是http传输的，js都是由客户端加载的，因此，如果此时在客户端和第三方服务器间存在恶意代理，便可以随便截取第三方网页的js文件；而且目标app提供的js调用接口并没有完全拒绝http传输的内容，所以只要你手机加载的js文件存在异常行为，就会直接执行并反馈到屏幕前。<br>详细步骤如下：</p>
 <ol>
 <li>如下图，当我们点击APPname://APPname.app/openwith?address=<a href="https://flyh6.cn这样的链接后，首先会打开目标APP，APP会通过webview接口去访问第三方网站，期间需要通过白名单审核，审核通过才能访问。" target="_blank" rel="noopener">https://flyh6.cn这样的链接后，首先会打开目标APP，APP会通过webview接口去访问第三方网站，期间需要通过白名单审核，审核通过才能访问。</a></li>
@@ -112,32 +112,32 @@
 <li>在我们修改好我们劫持的js文件后，目标APP的webview接口再次进行审核，由于js文件是加载在flyh6.cn上的，也会跟着flyh6.cn顺利通过审核。</li>
 <li>此时就是最后一步，目标APP执行我们构造好的恶意代码后，直接调用代码中对应能获取用户数据的Js接口，并最终返回用户的敏感数据。</li>
 </ol>
-<p><img src="7B653F36EE0E4E11B001CDEB9B4D28A7" alt="2"></p>
+<p><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/APP中间人攻击：你以为白名单就安全了/2.png" alt="2"></p>
 <p>&emsp;&emsp;这里有个问题，调用app的js接口跟让app执行js是两个概念。我曾经在抓到的js里疯狂alert(“xss”)，弹出来了xss，这就是调用了app的接口吗？很明显，肯定是调用了app的接口，这是个执行和调用两个名词之间的误解。payload里调用app的这个接口可以获取敏感信息，感觉调用的定义被包含在执行的定义里，执行&gt;调用，调用可能是让app里面的java源码里的某个特定功能的方法去解析的payload，而执行，则不一定用哪个方法了，可以是其他方法，这个方法则未必能获取用户的敏感数据。所以，即便我们能调用到此类方法，也不能获取到敏感数据，也是徒劳。（但我觉得应该不能让非HTTPS的数据去调用任何JS接口）</p>
 <p><strong>问题修复：</strong><br>&emsp;&emsp;原代码中，如下图，并没有做验证，所以才会导致此漏洞。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public WebResourceResponse shouldInterceptRequest(WebView view，final WebResourceRequest request)&#123;</span><br><span class="line">    if(CommonUtil.isBetaVersion())&#123;</span><br><span class="line">        string url_temp = request.getUrl().toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>&emsp;&emsp;修复后的代码如图1中的<code>Public WebResourceResponse shouldInterceptReqest ( WebView view, String url_temp )</code>这个函数大概意思就是拦截访问的URL作白名单验证。</p>
-<p><img src="39D89BCEB11941AD8102BA7E8305AC14" alt="3"><br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;图1<br>1.第一层验证：验证了是否是测试版本和访问的URL的传输方式是否是HTTPS<br>2.第二层验证：验证了访问的URL是否在白名单且是否为不安全URL。</p>
-<p><img src="6783484BEB26488281332AF3EEFD1BE1" alt="4"><br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;图2<br>&emsp;&emsp;图2中的Public WebResourceResponse shouldInterceptReqest ( WebView view, final WebResourceRequest request )这个函数大概意思就是拦截数据包的request请求，配合getUrl()，可将request请求包中的url截取下来，再进行判断。这样一来，就不单只验证白名单的URL，同时还会把由APP发送出去的request请求中的URL也拉出来作验证。</p>
+<p><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/39D89BCEB11941AD8102BA7E8305AC14" alt="3"><br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;图1<br>1.第一层验证：验证了是否是测试版本和访问的URL的传输方式是否是HTTPS<br>2.第二层验证：验证了访问的URL是否在白名单且是否为不安全URL。</p>
+<p><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/6783484BEB26488281332AF3EEFD1BE1" alt="4"><br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;图2<br>&emsp;&emsp;图2中的Public WebResourceResponse shouldInterceptReqest ( WebView view, final WebResourceRequest request )这个函数大概意思就是拦截数据包的request请求，配合getUrl()，可将request请求包中的url截取下来，再进行判断。这样一来，就不单只验证白名单的URL，同时还会把由APP发送出去的request请求中的URL也拉出来作验证。</p>
 <p><strong>详细步骤：</strong>  </p>
 <ol>
 <li>先设置burp，此时需要注意以下几点：</li>
 </ol>
 <ul>
-<li><p>&emsp;&emsp;因为此app默认使用https传送数据，并且其服务器使用的是强校验（假装有强校验理解链接），burp作为中间人是无法校验通过的，在工具的alert标签里也会提示SSL validate失败。如果https强校验的数据包经过burp，burp会把https的数据包损坏，或者直接被burp丢弃（因为服务器不接受这个数据包），那么加载在页面上的js文件也会一同被丢弃。所以第一点就是如何让https流量不经burp（burp会截断手机发出去的所有数据包，不一定非要和APP有关系），此时我们需要设置proxy-&gt;options-&gt;SSL Pass Through-&gt;Automatically add entries on client SSL negotiation failure。<br>&emsp;&emsp;此设置会截取第一次的https流量并记录，下次就不再截取首次遇到的https流量，也可以自己手动添加网址，比如此时我们需要设置flyh6.cn:443，Burp不会自动把请求中所包含的地址添加到设置中。实验过，我想访问<a href="https://www.163.com的时候，burp不会自动添加https://www.163.com到设置里。手动添加的效果如下图。" target="_blank" rel="noopener">https://www.163.com的时候，burp不会自动添加https://www.163.com到设置里。手动添加的效果如下图。</a><br><img src="BEE438FB8029418BB6694F81377D2305" alt="5"></p>
+<li><p>&emsp;&emsp;因为此app默认使用https传送数据，并且其服务器使用的是强校验（假装有强校验理解链接），burp作为中间人是无法校验通过的，在工具的alert标签里也会提示SSL validate失败。如果https强校验的数据包经过burp，burp会把https的数据包损坏，或者直接被burp丢弃（因为服务器不接受这个数据包），那么加载在页面上的js文件也会一同被丢弃。所以第一点就是如何让https流量不经burp（burp会截断手机发出去的所有数据包，不一定非要和APP有关系），此时我们需要设置proxy-&gt;options-&gt;SSL Pass Through-&gt;Automatically add entries on client SSL negotiation failure。<br>&emsp;&emsp;此设置会截取第一次的https流量并记录，下次就不再截取首次遇到的https流量，也可以自己手动添加网址，比如此时我们需要设置flyh6.cn:443，Burp不会自动把请求中所包含的地址添加到设置中。实验过，我想访问<a href="https://www.163.com的时候，burp不会自动添加https://www.163.com到设置里。手动添加的效果如下图。" target="_blank" rel="noopener">https://www.163.com的时候，burp不会自动添加https://www.163.com到设置里。手动添加的效果如下图。</a><br><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/BEE438FB8029418BB6694F81377D2305" alt="5"></p>
 </li>
 <li><p>&emsp;&emsp;你会发现你怎么都抓取不到js文件，因为在图1中，你可以看到，对requests匹配项里有一个设置是does not match （^gif$|^jpg$|^png$|^css$|^js$|^ico$)，如果你勾选了这个设置，那你抓不到利用http协议下载js的那个网页cdn.xxx.com/xxx/xxx.js是正常的。</p>
 </li>
 </ul>
-<p><img src="79679800708148CD88D63E98B8371A63" alt="6"></p>
+<p><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/79679800708148CD88D63E98B8371A63" alt="6"></p>
 <ol start="2">
 <li>设置，建议给手机WiFi设置127.0.0.1:8080的代理，burp也设置127.0.0.1:8080代理服务器，最好笔记本跟手机连在同一个wifi环境下。此时还需要做一步，打开cmd，输入adb reverse tcp:8080 tcp:8080，大概意思就是让手机的8080端口和burp8080端口做个镜像，这样从手机发出去的流量就会被burp所截获。</li>
 <li>手机谷歌浏览器打开上述网址，一般会打开app并由app访问b链接，此时正确情况是，app会停在一个等待页面（如图1），这样才能算正确的截获了app发出去的报文，如果app直接报错（如图2），那就是代理有问题。</li>
 </ol>
-<p><img src="762D2EA5255A47D4BA128A7D43FFE56F" alt="7"><br>图1<br><img src="2F54D49F2419459888A4BC8EA296138B" alt="8"><br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;图2</p>
+<p><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/762D2EA5255A47D4BA128A7D43FFE56F" alt="7"><br>图1<br><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/2F54D49F2419459888A4BC8EA296138B" alt="8"><br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;图2</p>
 <ol start="4">
 <li>上述一切都没问题的话，你应该就可以抓到js所在的那个网页，但是，如果你正确理解的话，你会发现如果让app执行我们篡改的js的话，不应该是抓回包吗？（第三方有问题页面–&gt;&gt;app）对的，此时你只需要设置抓requests报文的同时抓response报文就可以了，如图3。最后的效果就是这样，你再把你准备好的payload输入到返回包内，最终效果如图4，app上会泄露token等敏感信息。</li>
 </ol>
-<p><img src="19260031D41F4A0DAEA5ED83BFD52C88" alt="9"><br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;图3<br><img src="D34443A2A7174A9B903CD4915444CF75" alt="10"><br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;图4</p>
+<p><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/19260031D41F4A0DAEA5ED83BFD52C88" alt="9"><br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;图3<br><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/D34443A2A7174A9B903CD4915444CF75" alt="10"><br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;图4</p>
 <p><strong>结语：</strong><br>&emsp;&emsp;上述的描述肯定不够详细，而且这种思路的实际利用方法并不简单，但是我发这篇文章的目的并不是让你去弹token，只是想分享这个思路，以后再遇到白名单的时候，说不定你会借鉴这种思路发展处更优秀的思路。谢谢。</p>
 
       
@@ -150,6 +150,11 @@
         </div>
         
         
+  
+  <div class="tags">
+    <a href="/tags/APP/">APP</a>
+  </div>
+
         <!-- partial('post/share') -->
       <div class="clearfix"></div>
     </footer>
@@ -191,15 +196,6 @@
 </div>
 
   
-<div class="widget tag">
-  <h3 class="title">Categories</h3>
-  <ul class="entry">
-  
-    <li><a href="/categories/Testing/">Testing</a><small>0</small></li>
-  
-  </ul>
-</div>
-
 
   
 <div class="widget tag">
@@ -207,7 +203,7 @@
   <ul class="entry">
     
       <li>
-        <a href="/2018/12/19/APP中间人攻击：你以为白名单就安全了/"></a>
+        <a href="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/">APP中间人攻击：你以为白名单就安全了</a>
       </li>
     
   </ul>
@@ -219,11 +215,7 @@
   <h3 class="title">Tags</h3>
   <ul class="entry">
   
-    <li><a href="/tags/Another-Tag/">Another Tag</a><small>0</small></li>
-  
-    <li><a href="/tags/Teseting/">Teseting</a><small>0</small></li>
-  
-    <li><a href="/tags/hello-everyone/">hello everyone~</a><small>0</small></li>
+    <li><a href="/tags/APP/">APP</a><small>1</small></li>
   
   </ul>
 </div>
@@ -233,7 +225,7 @@
 <div class="widget tagcloud">
   <h3 class="title">Tag Cloud</h3>
   <div class="entry">
-    
+    <a href="/tags/APP/" style="font-size: 10px;">APP</a>
   </div>
 </div>
 
