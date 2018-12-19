@@ -103,7 +103,7 @@
 <li>装有app的手机</li>
 </ol>
 <p><strong>payload：</strong>  </p>
-<p><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/APP中间人攻击：你以为白名单就安全了/1.png" alt="1"></p>
+<p><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/1.png" alt="1"></p>
 <p><strong>攻击原理：</strong><br>&emsp;&emsp;访问第三方网页没问题，是使用https传输的；但是第三方网页渲染所需（还是广告）的js文件是http传输的，js都是由客户端加载的，因此，如果此时在客户端和第三方服务器间存在恶意代理，便可以随便截取第三方网页的js文件；而且目标app提供的js调用接口并没有完全拒绝http传输的内容，所以只要你手机加载的js文件存在异常行为，就会直接执行并反馈到屏幕前。<br>详细步骤如下：</p>
 <ol>
 <li>如下图，当我们点击APPname://APPname.app/openwith?address=<a href="https://flyh6.cn这样的链接后，首先会打开目标APP，APP会通过webview接口去访问第三方网站，期间需要通过白名单审核，审核通过才能访问。" target="_blank" rel="noopener">https://flyh6.cn这样的链接后，首先会打开目标APP，APP会通过webview接口去访问第三方网站，期间需要通过白名单审核，审核通过才能访问。</a></li>
@@ -111,7 +111,7 @@
 <li>在我们修改好我们劫持的js文件后，目标APP的webview接口再次进行审核，由于js文件是加载在flyh6.cn上的，也会跟着flyh6.cn顺利通过审核。</li>
 <li>此时就是最后一步，目标APP执行我们构造好的恶意代码后，直接调用代码中对应能获取用户数据的Js接口，并最终返回用户的敏感数据。</li>
 </ol>
-<p><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/APP中间人攻击：你以为白名单就安全了/2.png" alt="2"></p>
+<p><img src="/2018/12/19/APP中间人攻击：你以为白名单就安全了-1/2.png" alt="2"></p>
 <p>&emsp;&emsp;这里有个问题，调用app的js接口跟让app执行js是两个概念。我曾经在抓到的js里疯狂alert(“xss”)，弹出来了xss，这就是调用了app的接口吗？很明显，肯定是调用了app的接口，这是个执行和调用两个名词之间的误解。payload里调用app的这个接口可以获取敏感信息，感觉调用的定义被包含在执行的定义里，执行&gt;调用，调用可能是让app里面的java源码里的某个特定功能的方法去解析的payload，而执行，则不一定用哪个方法了，可以是其他方法，这个方法则未必能获取用户的敏感数据。所以，即便我们能调用到此类方法，也不能获取到敏感数据，也是徒劳。（但我觉得应该不能让非HTTPS的数据去调用任何JS接口）</p>
 <p><strong>问题修复：</strong><br>&emsp;&emsp;原代码中，如下图，并没有做验证，所以才会导致此漏洞。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public WebResourceResponse shouldInterceptRequest(WebView view，final WebResourceRequest request)&#123;</span><br><span class="line">    if(CommonUtil.isBetaVersion())&#123;</span><br><span class="line">        string url_temp = request.getUrl().toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>&emsp;&emsp;修复后的代码如图1中的<code>Public WebResourceResponse shouldInterceptReqest ( WebView view, String url_temp )</code>这个函数大概意思就是拦截访问的URL作白名单验证。</p>
