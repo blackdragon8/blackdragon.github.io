@@ -1,0 +1,4 @@
+web.xml配置：https://www.cnblogs.com/jxldjsn/p/8099101.html，https://blog.csdn.net/winter2121/article/details/89784637
+.htaccess配置：https://www.yiyada.com/1817.html
+单独php页面配置：https://blog.csdn.net/fengzhizi76506/article/details/53933282
+phpstudy2018 访问目录服务权限问题：https://blog.csdn.net/qq_23375733/article/details/86569798

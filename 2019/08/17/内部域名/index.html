@@ -1,0 +1,223 @@
+<!DOCTYPE HTML>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>内部域名 | Leo.Li&#39;s Blog</title>
+  <meta name="author" content="Leo Li">
+
+  
+  <meta name="description" content="blog">
+  
+
+  
+  <meta name="keywords" content="hacked">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="内部域名">
+  <meta property="og:site_name" content="Leo.Li&#39;s Blog">
+
+  
+  
+
+  
+    <meta property="og:image" content="">
+  
+
+  
+  <link href="/css/images/favicon.ico" rel="icon">
+  
+
+  <link rel="alternate" href="/atom.xml" title="Leo.Li&#39;s Blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+
+  <!-- baidu webmaster push -->
+  <script src="//push.zhanzhang.baidu.com/push.js"></script>
+
+</head>
+</html>
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Leo.Li&#39;s Blog</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">主页</a></li>
+    
+      <li><a href="/categories">分类</a></li>
+    
+      <li><a href="/archives">归档</a></li>
+    
+      <li><a href="/tags">标签</a></li>
+    
+      <li><a href="/about">关于</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div></header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2019-08-16T17:57:19.000Z"><a href="/2019/08/17/内部域名/">2019-08-17</a></time>
+      
+      
+  
+    <h1 class="title">内部域名</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>摘要：域名<br><a id="more"></a></p>
+<h1 id="内部域名"><a href="#内部域名" class="headerlink" title="内部域名"></a>内部域名</h1><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><hr>
+<p>&emsp;&emsp;多少人渗透测试都有自己的流程，且按着自己的流程一直工作着，我也按我的流程工作了很久，虽然在一步步完善，就像黑洞一样，有我填不完的坑，以至于我们很少去改变自己想法，墨守成规不是我们这群人应该做的。<br>&emsp;&emsp;在我看到圈子线下沙龙的pdf文档后，才知道自己墨守成规的东西，别人已经在一步一步突破，我甚至都没有听过内部域名这个概念。而且这个概念对于信息收集来说非常重要，而信息收集是整个渗透流程的重中之重。</p>
+<h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><hr>
+<h4 id="1-为什么会有内部域名"><a href="#1-为什么会有内部域名" class="headerlink" title="1. 为什么会有内部域名"></a>1. 为什么会有内部域名</h4><p>&emsp;&emsp;大家有没有过在做c段的时候，输入一个ip不是403，就是503、404这样的情况，这可能是因为厂家在自己服务器搭建好apache服务后，不向域名服务商提供A记录(既域名解析记录)，域名服务商的dns服务器无法和公共的dns服务器进行同步(简单说就是不要公网域名)。这时外网是无法通过公共的dns服务器缓存的a记录去解析ip对应的域名，因为公共dns服务器没有吖。此时可以直接通过访问ip地址达到访问web服务的目的，问题也就在这里。如下图，如果对通过访问ip的方式进行403禁止，那我们还能怎么办？扫目录？封死。<br>&emsp;&emsp;//内心独白：这里我需要去证实如何禁止ip访问以及如何配置达到禁止扫描目录的目的(我需要去证实像pdf中那样禁止ip访问是否会影响到目录扫描，如果不，如何配置才可以)。实际上，下图中的dirbuster我已经使用了递归的扫描测试，依旧无法扫除403下的其他目录。下面还会讨论web目录扫描的相关问题。  </p>
+<p><img src="/2019/08/17/内部域名/httpconf.png"><center>httpd.conf配置</center></p>
+<p><img src="/2019/08/17/内部域名/ip.png"><center>ip扫描结果</center></p>
+<p>&emsp;&emsp;端口只开了443，扫不了目录，没有办法了？所以这里提出了内部域名的概念。</p>
+<h4 id="2-内部域名如何工作？"><a href="#2-内部域名如何工作？" class="headerlink" title="2. 内部域名如何工作？"></a>2. 内部域名如何工作？</h4><p>&emsp;&emsp;我能想到最简单的方式就是域控，域控也是域内的dns服务器，这个想必大家都知道了。所以说，这些不在公网dns缓存的A记录，将会在域控中缓存，已达到一般内部人员(域内)访问，外部人员”不知晓”的情况。请注意，我用的是不知晓，但未必不可发现。另外我想声明一下这个内部域名，起初我也很纳闷，内部域名跟大佬文章里提到的host(host在域内可以是主机名)，感觉就像内部域名只能内网去解析，不知道大家有没有这种感觉。其实吧，这个内部域名我觉得大佬应该是想跟子域名进行区分，与其称之为内部域名，其实这个内部域名更像是种代号，这个代号是访问web内容的唯一途径。举个例子，ip像是某位间谍(web服务器)被告知的交易地点，内部域名只是他的代号，一般情况只有间谍组织内部(域内)知道互相的代号。某间谍(web服务器)通过他们自己的间谍组织规矩(web配置文件)，发现，只有喊出代号的人才是自己人，可以跟自己交流，其他都403。至于喊出代号那个人是谁？我管他呢，间谍组织就用这么简单的认证，怪我咯？一般间谍组织的人碰头，都不知道对方的真实身份，没毛病吧？这样解释，我勉强接受吧。。。意思主要表达的是，这个内部域名(代号)其实也可以通过外网去访问。毕竟代号只是代号，知道代号的人也未必就是间谍组织(域内)的人。哈哈哈哈哈哈哈哈<br>&emsp;&emsp;为什么我要说未必不可发现？这里要提到dns解析的步骤，也是漏洞原理。<br>&emsp;&emsp;第一步，浏览器缓存;<br>&emsp;&emsp;第二步，hosts文件;后面的我们可以不关心了，我们虽然不知道内部域名(其实可以通过敏感信息泄露去发现)，但是笨点的办法就是在hosts.中手动对应去爆破，既这个代号我可以fuzz，你们就默认这个碰面的间谍(web服务器)是个zz吧。。。当然，原文作者提供了一个自动化脚本。<br>&emsp;&emsp;第三步，本地DNS缓存(ipconfig /displaydns);<br>&emsp;&emsp;第四步，本地dns服务器<br>&emsp;&emsp;第五步，根服务器<br>&emsp;&emsp;这里我需要证实通过内部域名在hosts文件中进行绑定后可以正常访问，且可以扫目录。</p>
+<p><img src="/2019/08/17/内部域名/hosts.png"><center>hosts配置</center></p>
+<p><img src="/2019/08/17/内部域名/内部域名.png"><center>使用了内部域名的扫描结果</center></p>
+<h4 id="3-内部域名能为我们带来什么？"><a href="#3-内部域名能为我们带来什么？" class="headerlink" title="3. 内部域名能为我们带来什么？"></a>3. 内部域名能为我们带来什么？</h4><p>&emsp;&emsp;Chances。往往这些内部域名出事的概率会比公网域名大很多。毕竟目标以为我们不知道。直以为的后果是很严重的。</p>
+<h3 id="web目录访问权限"><a href="#web目录访问权限" class="headerlink" title="web目录访问权限:"></a>web目录访问权限:</h3><p>&emsp;&emsp;我觉得这个还是单独拿出来讲比较好，因为你跑不出web目录会有很多种情况。<br>&emsp;&emsp;最简单的如上的web服务配置，你就别想扫出来一丁点。<br>&emsp;&emsp;还有就是通过vhost.conf，效果和配置httpd.conf一样，设置一个目录，目录下的文件同样会被禁止访问，但是不同工具的扫描效果不一致。如果想要目录下的其他目录可以被访问，得在配置文件中再加个location，如下图。[<em>没错，聪明如我的你应该发现了，不使用内部域名，即便能扫出来的也是403的页面，但其实我们用内部域名就可以随便访问。还有就是我对比了我用过最多的几款扫描目录的工具，发现只有7kb这款工具即便在没有设置内部域名的情况下，还是可以扫描出非内部域名访问得到的403页面，其他工具一律不行，最直接的对比就是跟dirsearch，我从根目录扫，dirsearch甚至都扫不出来根目录下的index.php，我并没有对根目录进行403禁止</em> ]。  </p>
+<p><img src="/2019/08/17/内部域名/allowUploadDoc.png"><center>dirbuster缓存问题，我其实扫的是根目录，7kb我是从upload目录开始扫的</center></p>
+<p>&emsp;&emsp;再有就是类似框架的网站，可以通过配置web.xml或者.htaccess达到目的。具体扫描效果，实在懒得弄了。。。  </p>
+<h3 id="疑问点"><a href="#疑问点" class="headerlink" title="疑问点:"></a>疑问点:</h3><p>&emsp;&emsp;一般404页面代表不存在这个页面，作者为何说404页面也可能存在内部域名？我也知道web服务器可以把某些页面指定到404页面，但是我未找到相关的方法。且这个404页面到底存不存在还需要我们去证实，很费事。。。关键是我确确实实从404中扫出来过东西。</p>
+<h3 id="结语"><a href="#结语" class="headerlink" title="结语:"></a>结语:</h3><p>&emsp;&emsp;web目录扫描，不只是用用工具这么简单，毕竟工具只是工具。路很长，需要慢慢探索。</p>
+<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><p>web.xml配置：<a href="https://www.cnblogs.com/jxldjsn/p/8099101.html，https://blog.csdn.net/winter2121/article/details/89784637" target="_blank" rel="noopener">https://www.cnblogs.com/jxldjsn/p/8099101.html，https://blog.csdn.net/winter2121/article/details/89784637</a><br>.htaccess配置：<a href="https://www.yiyada.com/1817.html" target="_blank" rel="noopener">https://www.yiyada.com/1817.html</a><br>单独php页面配置：<a href="https://blog.csdn.net/fengzhizi76506/article/details/53933282" target="_blank" rel="noopener">https://blog.csdn.net/fengzhizi76506/article/details/53933282</a><br>phpstudy2018 访问目录服务权限问题：<a href="https://blog.csdn.net/qq_23375733/article/details/86569798" target="_blank" rel="noopener">https://blog.csdn.net/qq_23375733/article/details/86569798</a></p>
+
+      
+    </div>
+    
+    <footer>
+        <div class="alignright">
+          
+          <a href="javascript:void(0)" class="share-link bdsharebuttonbox" data-cmd="more">分享</a>
+        </div>
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/WEB/">WEB</a>
+  </div>
+
+        <!-- partial('post/share') -->
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:blog.youdube.ga">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/APP/">APP</a><small>1</small></li>
+  
+    <li><a href="/categories/WEB/">WEB</a><small>1</small></li>
+  
+    <li><a href="/categories/区块链/">区块链</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">Recent Posts</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2019/08/17/内部域名/">内部域名</a>
+      </li>
+    
+      <li>
+        <a href="/2019/05/07/上传总结/">上传总结</a>
+      </li>
+    
+      <li>
+        <a href="/2019/04/23/渗透感想/">渗透感想</a>
+      </li>
+    
+      <li>
+        <a href="/2019/02/10/浅析https原理以及过程/">浅析https原理以及过程</a>
+      </li>
+    
+      <li>
+        <a href="/2019/01/01/我认识的区块链/">初始区块链</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">Tags</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/APP/">APP</a><small>1</small></li>
+  
+    <li><a href="/tags/WEB/">WEB</a><small>4</small></li>
+  
+    <li><a href="/tags/区块链/">区块链</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  <p>
+  
+  &copy; 2019 Leo Li
+  
+  All rights reserved.</p>
+  <p>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></p>
+</div>
+<div class="clearfix"></div>
+
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="bg"></div>
+</body>
+</html>

